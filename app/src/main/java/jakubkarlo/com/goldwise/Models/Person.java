@@ -11,9 +11,10 @@ public class Person {
     private int color;
 
 
-    public Person(String name, double share) {
+    public Person(String name, double share, int color) {
         this.name = name;
         this.share = share;
+        this.color = color;
     }
 
     public double getShare() {

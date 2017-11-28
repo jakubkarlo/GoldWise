@@ -55,6 +55,10 @@ public class AddEventActivity extends AppCompatActivity {
         try {
             participants.put(new JSONObject().put("name", "rafał").put("share", 20).put("color", Color.argb(255, 64, 100, 0)));
             participants.put(new JSONObject().put("name", "kuuuba").put("share", 50).put("color", Color.argb(255, 255, 0, 0)));
+            participants.put(new JSONObject().put("name", "piotr").put("share", 202).put("color", Color.argb(255, 0, 100, 0)));
+            participants.put(new JSONObject().put("name", "tadek").put("share", 510).put("color", Color.argb(255, 0, 0, 255)));
+            participants.put(new JSONObject().put("name", "dupek").put("share", 200).put("color", Color.argb(255, 0, 255, 0)));
+            participants.put(new JSONObject().put("name", "mirinda").put("share", 10).put("color", Color.argb(255, 0, 0, 0)));
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -87,7 +91,13 @@ public class AddEventActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
         }
 
-        // add code to go back to event list
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        });
+        // refresh the event list
 
 
     }

@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,10 +22,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.ExecutionException;
 
 import jakubkarlo.com.goldwise.Downloaders.ParticipantsDownloader;
 import jakubkarlo.com.goldwise.Models.Event;
+import jakubkarlo.com.goldwise.Models.Person;
 import jakubkarlo.com.goldwise.R;
 
 
@@ -83,7 +87,7 @@ public class EventOverviewFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_event_overview, container, false);
-        arcView = (DecoView)root.findViewById(R.id.dynamicArcView);
+        arcView = (DecoView) root.findViewById(R.id.dynamicArcView);
         return root;
     }
 
@@ -93,6 +97,8 @@ public class EventOverviewFragment extends Fragment {
 
         ParticipantsDownloader participantsDownloader = new ParticipantsDownloader();
         JSONArray participants = null;
+        ArrayList<Person> people = new ArrayList<>();
+
         try {
             participants = participantsDownloader.execute(EventOverviewFragment.this.eventID).get();
         } catch (InterruptedException e) {
@@ -101,50 +107,49 @@ public class EventOverviewFragment extends Fragment {
             e.printStackTrace();
         }
 
-
         arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 218, 218, 218))
                 .setRange(0, 100, 100)
                 .setInitialVisibility(true)
                 .setLineWidth(100f)
                 .build());
 
-
-        // draw the chart of shares
+        //write all JSONs to Person Array and sum their shares
         if (participants != null) {
 
-            for (int position = 0, minRange = 0, maxRange = 100; position < participants.length(); position++){
-
-                JSONObject currentPerson = null;
-                SeriesItem seriesItem = null;
+            double sharesSum = 0;
+            for (int i = 0; i < participants.length(); i++) {
 
                 try {
-                    currentPerson = participants.getJSONObject(position);
+                    JSONObject currentPerson = participants.getJSONObject(i);
+                    people.add(new Person(currentPerson.getString("name"), currentPerson.getDouble("share"), currentPerson.getInt("color")));
+                    sharesSum += currentPerson.getDouble("share");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                if (currentPerson!= null) {
-                    try {
-                        seriesItem = new SeriesItem.Builder(Color.argb(255, 64, 100, 0))
-                                .setRange(minRange, maxRange, (float)currentPerson.getDouble("share"))
-                                .setLineWidth(100f)
-                                .setSeriesLabel(new SeriesLabel.Builder(currentPerson.getString("name")).build())
-                                .build();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (seriesItem != null) {
-                    arcView.addSeries(seriesItem);
-                }
+            }
+
+            // sort the people in order to get the right chart
 
 
+            // draw the chart of shares with already calculated sum
+            // do it recursively for the right chart
+            for (int i = people.size() - 1; i >= 0 ; i--) {
+                //seems for the first time it's calculated twice
+                double sum = sumPersonShare(people, i);
+                drawChart(people, i, sharesSum, sum);
+                //add labels and percentages for all participants
+                Log.i("Sum", String.valueOf(sum));
             }
 
         }
+
+
     }
 
+
     // TODO: Rename method, update argument and hook method into UI event
+
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -168,6 +173,32 @@ public class EventOverviewFragment extends Fragment {
         mListener = null;
     }
 
+    public double sumPersonShare(ArrayList<Person> people, int position){
+        if (position == 0){
+            return people.get(position).getShare();
+        }
+        else{
+            return people.get(position).getShare() + sumPersonShare(people, position-1);
+        }
+    }
+
+
+    public void drawChart(ArrayList<Person> people, int position, double sharesSum, double currentShare) {
+
+
+        SeriesItem seriesItem = null;
+            seriesItem = new SeriesItem.Builder(people.get(position).getColor())
+                    .setRange(0, (float) sharesSum, (float)currentShare)
+                    .setLineWidth(100f)
+                    .setSeriesLabel(new SeriesLabel.Builder(people.get(position).getName()).build())
+                    .build();
+
+            if (seriesItem != null) {
+                arcView.addSeries(seriesItem);
+            }
+
+
+    }
 
 
     /**
