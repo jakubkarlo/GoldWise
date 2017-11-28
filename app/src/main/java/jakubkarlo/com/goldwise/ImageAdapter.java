@@ -1,6 +1,9 @@
 package jakubkarlo.com.goldwise;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +11,16 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.parse.FindCallback;
+import com.parse.GetDataCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jakub on 07.11.2017.
@@ -16,11 +28,13 @@ import java.util.ArrayList;
 
 public class ImageAdapter extends BaseAdapter {
     private Context context;
-    ArrayList<String> items;
+    private List<ParseObject> events;
+    Bitmap eventImage;
 
-    public ImageAdapter(Context context, ArrayList<String> items) {
+    public ImageAdapter(Context context, List<ParseObject> events) {
         this.context = context;
-        this.items  = items;
+        this.events = events;
+
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -29,6 +43,7 @@ public class ImageAdapter extends BaseAdapter {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View gridView;
+
 
         if (convertView == null) {
 
@@ -40,13 +55,30 @@ public class ImageAdapter extends BaseAdapter {
             // set value into textview
             TextView textView = (TextView) gridView
                     .findViewById(R.id.grid_item_label);
-            textView.setText(items.get(0));
+            textView.setText(events.get(position).get("title").toString());
 
             // set image based on selected text
-            ImageView imageView = (ImageView) gridView
+            final ImageView imageView = (ImageView) gridView
                     .findViewById(R.id.grid_item_image);
 
-                imageView.setImageResource(R.drawable.app_logo);
+            // code to obtain image YOU'LL NEED PHOTO COMPRESSION
+            ParseFile file = (ParseFile)events.get(position).get("image");
+
+            file.getDataInBackground(new GetDataCallback() {
+                @Override
+                public void done(byte[] data, ParseException e) {
+
+                    if (e == null & data != null){
+
+                        eventImage = BitmapFactory.decodeByteArray(data,0, data.length);
+                        imageView.setImageBitmap(eventImage);
+
+                    }
+
+                }
+            });
+
+
 
         } else {
             gridView = (View) convertView;
@@ -57,17 +89,17 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return items.size();
+        return events.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return events.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position; // not sure
     }
 
 }

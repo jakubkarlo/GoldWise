@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:name=".StarterApplication"
@@ -13,20 +14,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".EventsActivity" />
-        <activity android:name=".SplashScreen">
+        <activity android:name=".Activities.EventsActivity" />
+        <activity android:name=".Activities.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".SignUpActivity" />
+        <activity android:name=".Activities.LoginActivity" />
+        <activity android:name=".Activities.SignUpActivity" />
         <activity
-            android:name=".SpecificEventActivity"
+            android:name=".Activities.SpecificEventActivity"
             android:label="@string/title_activity_specific_event"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Activities.AddEventActivity"></activity>
     </application>
 
 </manifest>

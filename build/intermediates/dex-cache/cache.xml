@@ -3,6 +3,24 @@
 
     <item
         is-multidex="true"
+        jar="C:\Users\Jakub\.gradle\caches\modules-2\files-2.1\com.nineoldandroids\library\2.4.0\e9b63380f3a242dbdbf103a2355ad7e43bad17cb\library-2.4.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
+        <dex dex="D:\Carlo\IFE\Year4\Bachelor Thesis\GoldWise\app\build\intermediates\transforms\dex\debug\folders\1000\10\library-2.4.0_6fbebfa5be41674fb6a6517b5bf43fdb4132aa37\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="D:\Carlo\IFE\Year4\Bachelor Thesis\GoldWise\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="ecb017f2fc1e21675893f600a97788cabaef92d5">
+        <dex dex="D:\Carlo\IFE\Year4\Bachelor Thesis\GoldWise\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_77dc598bde2dd3a941ee6e224612ae4e13408f4a\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
         jar="D:\Carlo\IFE\Year4\Bachelor Thesis\GoldWise\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
         jumboMode="true"
         optimize="true"
@@ -12,12 +30,12 @@
     </item>
     <item
         is-multidex="true"
-        jar="D:\Carlo\IFE\Year4\Bachelor Thesis\GoldWise\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jar="C:\Users\Jakub\.android\build-cache\8cb3a8b7fd425fce4101dc389893188db7af8787\output\jars\classes.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.3"
-        sha1="31225acb578e5f47bfd40ca51aa3636e60080925">
-        <dex dex="D:\Carlo\IFE\Year4\Bachelor Thesis\GoldWise\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_77dc598bde2dd3a941ee6e224612ae4e13408f4a\classes.dex" />
+        sha1="d3db3fc2b65bcb63276a455085d4f4884cdadb44">
+        <dex dex="D:\Carlo\IFE\Year4\Bachelor Thesis\GoldWise\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_2350ea71a35401ef34b6d19d12d36d5e3d959890\classes.dex" />
     </item>
 
 </items>
