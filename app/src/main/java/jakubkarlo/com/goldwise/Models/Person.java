@@ -8,6 +8,7 @@ public class Person {
 
     private String name;
     private double share;
+    private int color;
 
 
     public Person(String name, double share) {
@@ -29,5 +30,13 @@ public class Person {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 }

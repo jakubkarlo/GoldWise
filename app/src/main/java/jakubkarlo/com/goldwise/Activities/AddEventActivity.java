@@ -2,6 +2,7 @@ package jakubkarlo.com.goldwise.Activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -11,10 +12,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
-import com.parse.SaveCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,10 +21,11 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
-import jakubkarlo.com.goldwise.Models.Person;
 import jakubkarlo.com.goldwise.R;
+import jakubkarlo.com.goldwise.Uploaders.NewEventUploader;
+
 
 public class AddEventActivity extends AppCompatActivity {
 
@@ -53,14 +53,14 @@ public class AddEventActivity extends AppCompatActivity {
 
 
         try {
-            participants.put(new JSONObject().put("name", "rafał").put("share", 20));
-            participants.put(new JSONObject().put("name", "kuuuba").put("share", 50));
+            participants.put(new JSONObject().put("name", "rafał").put("share", 20).put("color", Color.argb(255, 64, 100, 0)));
+            participants.put(new JSONObject().put("name", "kuuuba").put("share", 50).put("color", Color.argb(255, 255, 0, 0)));
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        // delete afterwards
+        // delete afterwards, do it as an asynchronous task
         ParseObject parseEvent = new ParseObject("Event");
         parseEvent.put("title", eventTitle.getText().toString());
         parseEvent.put("description", "random");// just for now
@@ -72,23 +72,20 @@ public class AddEventActivity extends AppCompatActivity {
         byte[] byteArray = stream.toByteArray();
         ParseFile imageFile = new ParseFile("image.png", byteArray);
         parseEvent.put("image", imageFile);
-        parseEvent.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
 
-                if (e == null){
+        NewEventUploader eventUploader = new NewEventUploader();
+        String message = null;
+        try {
+            message = eventUploader.execute(parseEvent).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
-                    Toast.makeText(AddEventActivity.this, "Event uploaded!", Toast.LENGTH_SHORT).show();
-
-                } else{
-
-                    Toast.makeText(AddEventActivity.this, "Event cannot be uploaded", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-
-                }
-
-            }
-        });
+        if (message != null) {
+            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+        }
 
         // add code to go back to event list
 

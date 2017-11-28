@@ -109,9 +109,10 @@ public class EventOverviewFragment extends Fragment {
                 .build());
 
 
+        // draw the chart of shares
         if (participants != null) {
 
-            for (int position = 0, minRange = 0, maxRange = 100, currentColor = Color.argb(255, 64, 100, 0); position < participants.length(); position++, currentColor +=25){
+            for (int position = 0, minRange = 0, maxRange = 100; position < participants.length(); position++){
 
                 JSONObject currentPerson = null;
                 SeriesItem seriesItem = null;
@@ -124,7 +125,7 @@ public class EventOverviewFragment extends Fragment {
 
                 if (currentPerson!= null) {
                     try {
-                        seriesItem = new SeriesItem.Builder(currentColor)
+                        seriesItem = new SeriesItem.Builder(Color.argb(255, 64, 100, 0))
                                 .setRange(minRange, maxRange, (float)currentPerson.getDouble("share"))
                                 .setLineWidth(100f)
                                 .setSeriesLabel(new SeriesLabel.Builder(currentPerson.getString("name")).build())
