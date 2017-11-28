@@ -13,7 +13,18 @@ import android.view.ViewGroup;
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.charts.SeriesLabel;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.concurrent.ExecutionException;
+
+import jakubkarlo.com.goldwise.Downloaders.ParticipantsDownloader;
+import jakubkarlo.com.goldwise.Models.Event;
 import jakubkarlo.com.goldwise.R;
 
 
@@ -26,15 +37,16 @@ import jakubkarlo.com.goldwise.R;
  * create an instance of this fragment.
  */
 public class EventOverviewFragment extends Fragment {
+
     DecoView arcView;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String EVENT_ID = "";
+
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String eventID;
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -47,15 +59,15 @@ public class EventOverviewFragment extends Fragment {
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment EventOverviewFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static EventOverviewFragment newInstance(String param1, String param2) {
+    public static EventOverviewFragment newInstance(String param1) {
         EventOverviewFragment fragment = new EventOverviewFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        fragment.eventID = param1;
+
+        args.putString(EVENT_ID, param1);
         fragment.setArguments(args);
         return fragment;
     }
@@ -79,19 +91,56 @@ public class EventOverviewFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        ParticipantsDownloader participantsDownloader = new ParticipantsDownloader();
+        JSONArray participants = null;
+        try {
+            participants = participantsDownloader.execute(EventOverviewFragment.this.eventID).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+
         arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 218, 218, 218))
                 .setRange(0, 100, 100)
                 .setInitialVisibility(true)
                 .setLineWidth(100f)
                 .build());
 
-        SeriesItem seriesItem1 = new SeriesItem.Builder(Color.argb(255, 64, 196, 0))
-                .setRange(0, 100, 25)
-                .setLineWidth(100f)
-                .setSeriesLabel(new SeriesLabel.Builder("ello").build())
-                .build();
-        arcView.addSeries(seriesItem1);
 
+        if (participants != null) {
+
+            for (int position = 0, minRange = 0, maxRange = 100, currentColor = Color.argb(255, 64, 100, 0); position < participants.length(); position++, currentColor +=25){
+
+                JSONObject currentPerson = null;
+                SeriesItem seriesItem = null;
+
+                try {
+                    currentPerson = participants.getJSONObject(position);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                if (currentPerson!= null) {
+                    try {
+                        seriesItem = new SeriesItem.Builder(currentColor)
+                                .setRange(minRange, maxRange, (float)currentPerson.getDouble("share"))
+                                .setLineWidth(100f)
+                                .setSeriesLabel(new SeriesLabel.Builder(currentPerson.getString("name")).build())
+                                .build();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (seriesItem != null) {
+                    arcView.addSeries(seriesItem);
+                }
+
+
+            }
+
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event

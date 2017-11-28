@@ -65,6 +65,7 @@ public class AddEventActivity extends AppCompatActivity {
         parseEvent.put("title", eventTitle.getText().toString());
         parseEvent.put("description", "random");// just for now
         parseEvent.put("participants", participants); // another just for now
+
         // null conditions required too
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         eventBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);

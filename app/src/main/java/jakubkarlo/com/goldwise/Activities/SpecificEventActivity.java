@@ -44,7 +44,7 @@ public class SpecificEventActivity extends AppCompatActivity implements EventOve
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_specific_event);
 
-        setTitle(getIntent().getStringExtra("eventTitle"));
+        setTitle(getIntent().getStringExtra("eventID"));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -145,7 +145,7 @@ public class SpecificEventActivity extends AppCompatActivity implements EventOve
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-                   return new EventOverviewFragment();
+                   return EventOverviewFragment.newInstance(getIntent().getStringExtra("eventID"));
 
         }
 
