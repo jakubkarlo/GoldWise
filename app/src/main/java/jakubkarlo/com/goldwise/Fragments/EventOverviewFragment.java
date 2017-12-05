@@ -136,8 +136,8 @@ public class EventOverviewFragment extends Fragment {
             ArrayList<PieEntry> entries = new ArrayList<>();
             ArrayList<Integer> colors = new ArrayList<>();
 
-            for (Person person:people) {
-                entries.add(new PieEntry((float)person.getShare(), person.getName()));
+            for (Person person : people) {
+                entries.add(new PieEntry((float) person.getShare(), person.getName()));
                 colors.add(person.getColor());
 
             }
@@ -155,43 +155,51 @@ public class EventOverviewFragment extends Fragment {
             LatestDebtsDownloader debtsDownloader = new LatestDebtsDownloader();
 
             //budget progress bar
+            double eventBudget = 0;
             try {
-                double eventBudget = budgetDownloader.execute(eventID).get();
-                budgetBar.setMax((int)eventBudget);
-                budgetBar.setProgress((int)sharesSum);
+                eventBudget = budgetDownloader.execute(eventID).get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
+            }
+            if (eventBudget > 0) {
+                budgetBar.setMax((int) eventBudget);
+                budgetBar.setProgress((int) sharesSum);
             }
 
             //goal progress bar
+            double goalAmount = 0, currentState = 0;
+            ParseObject yourSaving = null;
             try {
-                ParseObject yourSaving = savingDownloader.execute(eventID).get();
-                double goalAmount = yourSaving.getDouble("goal");
-                double currentState = yourSaving.getDouble("currentState");
-                savingBar.setMax((int)goalAmount);
-                savingBar.setProgress((int)currentState);
-            } catch (InterruptedException e) {
+                yourSaving = savingDownloader.execute(eventID).get();
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+            }
+            if (yourSaving != null) {
+                goalAmount = yourSaving.getDouble("goal");
+                currentState = yourSaving.getDouble("currentState");
+                if (goalAmount > 0 && currentState > 0) {
+                    savingBar.setMax((int) goalAmount);
+                    savingBar.setProgress((int) currentState);
+                }
             }
 
             //latestDebts list
+            ArrayList<String> latestDebts = null;
             try {
-                ArrayList<String> latestDebts = debtsDownloader.execute(eventID, "3").get();
-                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, latestDebts);
+                latestDebts = debtsDownloader.execute(eventID, "3").get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            ArrayAdapter arrayAdapter = null;
+            if (latestDebts != null) {
+                arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, latestDebts);
                 latestDebtsListView.setAdapter(arrayAdapter);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
             }
 
 
         }
-
 
 
     }
@@ -221,10 +229,6 @@ public class EventOverviewFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-
-
-
 
 
     /**
