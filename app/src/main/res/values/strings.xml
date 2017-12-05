@@ -20,6 +20,12 @@
     <string name="signUpSuccessful_toast">Sign up successful</string>
     <string name="passwordsDontMatch_toast">Passwords don\'t match</string>
     <string name="provideData_toast">Provide all necessary data</string>
+
+    <!--textViews-->
+    <string name="eventBudget_textView">Event Budget</string>
+    <string name="newestSaving_textView">Your Goal</string>
+    <string name="latestDebts_textView">Latest Detbs</string>
+
     <string name="title_activity_specific_event">SpecificEventActivity</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>

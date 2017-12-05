@@ -4,17 +4,12 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import jakubkarlo.com.goldwise.Activities.EventsActivity;
-import jakubkarlo.com.goldwise.ImageAdapter;
-import jakubkarlo.com.goldwise.Models.Event;
 
 /**
  * Created by Jakub on 28.11.2017.

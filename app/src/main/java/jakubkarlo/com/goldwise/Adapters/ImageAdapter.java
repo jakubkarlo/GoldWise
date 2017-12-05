@@ -1,4 +1,4 @@
-package jakubkarlo.com.goldwise;
+package jakubkarlo.com.goldwise.Adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -21,6 +21,8 @@ import com.parse.ParseQuery;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jakubkarlo.com.goldwise.R;
 
 /**
  * Created by Jakub on 07.11.2017.

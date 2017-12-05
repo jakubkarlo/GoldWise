@@ -18,14 +18,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import jakubkarlo.com.goldwise.Fragments.DebtsFragment;
 import jakubkarlo.com.goldwise.Fragments.EventOverviewFragment;
+import jakubkarlo.com.goldwise.Fragments.ExpensesFragment;
+import jakubkarlo.com.goldwise.Fragments.ParticipantsFragment;
+import jakubkarlo.com.goldwise.Fragments.SavingsFragment;
 import jakubkarlo.com.goldwise.R;
+import jakubkarlo.com.goldwise.Interfaces.SpecificEventFragmentsWrapper;
 
-public class SpecificEventActivity extends AppCompatActivity implements EventOverviewFragment.OnFragmentInteractionListener {
+public class SpecificEventActivity extends AppCompatActivity implements SpecificEventFragmentsWrapper {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
+     * {@link FragmentPagerAdapter} derivative, which will keep every
      * {@link FragmentPagerAdapter} derivative, which will keep every
      * loaded fragment in memory. If this becomes too memory intensive, it
      * may be best to switch to a
@@ -116,18 +122,15 @@ public class SpecificEventActivity extends AppCompatActivity implements EventOve
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
+        public static PlaceholderFragment newInstance() {
             PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
             return fragment;
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            return null;
+            return inflater.inflate(R.layout.fragment_specific_event, container, false);
         }
     }
 
@@ -144,8 +147,21 @@ public class SpecificEventActivity extends AppCompatActivity implements EventOve
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-                   return EventOverviewFragment.newInstance(getIntent().getStringExtra("eventID"));
+            switch (position){
+                case 0:
+                    return EventOverviewFragment.newInstance(getIntent().getStringExtra("eventID"));
+                case 1:
+                    return ExpensesFragment.newInstance();
+                case 2:
+                    return DebtsFragment.newInstance();
+                case 3:
+                    return SavingsFragment.newInstance();
+                case 4:
+                    return ParticipantsFragment.newInstance();
+                default:
+                    return PlaceholderFragment.newInstance();
+            }
+
 
         }
 
@@ -163,13 +179,14 @@ public class SpecificEventActivity extends AppCompatActivity implements EventOve
                 case 1:
                     return "Expenses";
                 case 2:
-                    return "Owings";
+                    return "Debts";
                 case 3:
                     return "Savings";
                 case 4:
-                    return "Options";
+                    return "Participants";
+                default:
+                    return "No label";
             }
-            return null;
         }
     }
 }

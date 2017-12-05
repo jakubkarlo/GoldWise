@@ -1,26 +1,20 @@
 package jakubkarlo.com.goldwise.Activities;
 
 import android.content.Intent;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import jakubkarlo.com.goldwise.Downloaders.EventsDownloader;
-import jakubkarlo.com.goldwise.ImageAdapter;
+import jakubkarlo.com.goldwise.Adapters.ImageAdapter;
 import jakubkarlo.com.goldwise.R;
 
 public class EventsActivity extends AppCompatActivity {

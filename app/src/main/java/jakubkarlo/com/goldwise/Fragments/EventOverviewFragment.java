@@ -1,33 +1,34 @@
 package jakubkarlo.com.goldwise.Fragments;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 
-import com.hookedonplay.decoviewlib.DecoView;
-import com.hookedonplay.decoviewlib.charts.SeriesItem;
-import com.hookedonplay.decoviewlib.charts.SeriesLabel;
-import com.parse.ParseException;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.concurrent.ExecutionException;
 
+import jakubkarlo.com.goldwise.Downloaders.EventBudgetDownloader;
+import jakubkarlo.com.goldwise.Downloaders.LatestDebtsDownloader;
+import jakubkarlo.com.goldwise.Downloaders.OverviewSavingDataDownloader;
 import jakubkarlo.com.goldwise.Downloaders.ParticipantsDownloader;
-import jakubkarlo.com.goldwise.Models.Event;
 import jakubkarlo.com.goldwise.Models.Person;
 import jakubkarlo.com.goldwise.R;
 
@@ -42,7 +43,11 @@ import jakubkarlo.com.goldwise.R;
  */
 public class EventOverviewFragment extends Fragment {
 
-    DecoView arcView;
+    PieChart shareChart;
+    ProgressBar budgetBar;
+    ProgressBar savingBar;
+    ListView latestDebtsListView;
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String EVENT_ID = "";
@@ -87,7 +92,11 @@ public class EventOverviewFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_event_overview, container, false);
-        arcView = (DecoView) root.findViewById(R.id.dynamicArcView);
+        shareChart = (PieChart) root.findViewById(R.id.shareChart);
+        budgetBar = (ProgressBar) root.findViewById(R.id.budgetProgressBar);
+        savingBar = (ProgressBar) root.findViewById(R.id.newestSavingProgressBar);
+        latestDebtsListView = (ListView) root.findViewById(R.id.latestDebtsListView);
+
         return root;
     }
 
@@ -107,12 +116,6 @@ public class EventOverviewFragment extends Fragment {
             e.printStackTrace();
         }
 
-        arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 218, 218, 218))
-                .setRange(0, 100, 100)
-                .setInitialVisibility(true)
-                .setLineWidth(100f)
-                .build());
-
         //write all JSONs to Person Array and sum their shares
         if (participants != null) {
 
@@ -129,20 +132,66 @@ public class EventOverviewFragment extends Fragment {
 
             }
 
-            // sort the people in order to get the right chart
+            //pie cost participation chart
+            ArrayList<PieEntry> entries = new ArrayList<>();
+            ArrayList<Integer> colors = new ArrayList<>();
 
+            for (Person person:people) {
+                entries.add(new PieEntry((float)person.getShare(), person.getName()));
+                colors.add(person.getColor());
 
-            // draw the chart of shares with already calculated sum
-            // do it recursively for the right chart
-            for (int i = people.size() - 1; i >= 0 ; i--) {
-                //seems for the first time it's calculated twice
-                double sum = sumPersonShare(people, i);
-                drawChart(people, i, sharesSum, sum);
-                //add labels and percentages for all participants
-                Log.i("Sum", String.valueOf(sum));
             }
 
+            PieDataSet sharesDataSet = new PieDataSet(entries, null);
+            sharesDataSet.setColors(colors);
+
+            PieData sharesData = new PieData(sharesDataSet);
+            shareChart.setData(sharesData);
+
+
+            // asynchronous data downloaders
+            EventBudgetDownloader budgetDownloader = new EventBudgetDownloader();
+            OverviewSavingDataDownloader savingDownloader = new OverviewSavingDataDownloader();
+            LatestDebtsDownloader debtsDownloader = new LatestDebtsDownloader();
+
+            //budget progress bar
+            try {
+                double eventBudget = budgetDownloader.execute(eventID).get();
+                budgetBar.setMax((int)eventBudget);
+                budgetBar.setProgress((int)sharesSum);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            //goal progress bar
+            try {
+                ParseObject yourSaving = savingDownloader.execute(eventID).get();
+                double goalAmount = yourSaving.getDouble("goal");
+                double currentState = yourSaving.getDouble("currentState");
+                savingBar.setMax((int)goalAmount);
+                savingBar.setProgress((int)currentState);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            //latestDebts list
+            try {
+                ArrayList<String> latestDebts = debtsDownloader.execute(eventID, "3").get();
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, latestDebts);
+                latestDebtsListView.setAdapter(arrayAdapter);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+
         }
+
 
 
     }
@@ -173,32 +222,9 @@ public class EventOverviewFragment extends Fragment {
         mListener = null;
     }
 
-    public double sumPersonShare(ArrayList<Person> people, int position){
-        if (position == 0){
-            return people.get(position).getShare();
-        }
-        else{
-            return people.get(position).getShare() + sumPersonShare(people, position-1);
-        }
-    }
 
 
-    public void drawChart(ArrayList<Person> people, int position, double sharesSum, double currentShare) {
 
-
-        SeriesItem seriesItem = null;
-            seriesItem = new SeriesItem.Builder(people.get(position).getColor())
-                    .setRange(0, (float) sharesSum, (float)currentShare)
-                    .setLineWidth(100f)
-                    .setSeriesLabel(new SeriesLabel.Builder(people.get(position).getName()).build())
-                    .build();
-
-            if (seriesItem != null) {
-                arcView.addSeries(seriesItem);
-            }
-
-
-    }
 
 
     /**
