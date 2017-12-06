@@ -151,7 +151,7 @@ public class SpecificEventActivity extends AppCompatActivity implements Specific
                 case 0:
                     return EventOverviewFragment.newInstance(getIntent().getStringExtra("eventID"));
                 case 1:
-                    return ExpensesFragment.newInstance();
+                    return ExpensesFragment.newInstance(getIntent().getStringExtra("eventID"));
                 case 2:
                     return DebtsFragment.newInstance();
                 case 3:

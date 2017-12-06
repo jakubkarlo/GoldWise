@@ -8,7 +8,16 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.SearchView;
 
+import com.parse.ParseObject;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
+import jakubkarlo.com.goldwise.Downloaders.ExpensesDownloader;
 import jakubkarlo.com.goldwise.R;
 
 /**
@@ -20,16 +29,15 @@ import jakubkarlo.com.goldwise.R;
  * create an instance of this fragment.
  */
 public class ExpensesFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String EVENT_ID = "";
+    private String eventID;
 
     private OnFragmentInteractionListener mListener;
+
+    // UI elements
+    ListView expensesListView;
+    SearchView searchExpenseView;
+    ArrayList<String> expenseTitles;
 
     public ExpensesFragment() {
         // Required empty public constructor
@@ -43,9 +51,11 @@ public class ExpensesFragment extends Fragment {
      * @return A new instance of fragment ExpensesFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ExpensesFragment newInstance() {
+    public static ExpensesFragment newInstance(String param1) {
         ExpensesFragment fragment = new ExpensesFragment();
         Bundle args = new Bundle();
+        fragment.eventID = param1;
+        args.putString(EVENT_ID, param1);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,12 +70,66 @@ public class ExpensesFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_expenses, container, false);
+        expensesListView = (ListView) root.findViewById(R.id.expensesListView);
+        searchExpenseView = (SearchView) root.findViewById(R.id.searchExpenseView);
         return root;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // says it does too much work on a main thread
+        ExpensesDownloader expensesDownloader = new ExpensesDownloader();
+        ArrayList<ParseObject> expenses = null;
+
+        try {
+            expenses = expensesDownloader.execute(eventID, "Expense").get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        // for now just titles, then we'll make own adapter
+        expenseTitles = new ArrayList<>();
+        if (expenses != null) {
+            for (ParseObject expense:expenses){
+
+                expenseTitles.add(expense.getString("title"));
+
+            }
+        }
+
+        ArrayAdapter arrayAdapter = null;
+        if (!expenseTitles.isEmpty()) {
+            arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, expenseTitles);
+            expensesListView.setAdapter(arrayAdapter);
+        }
+
+        //set search expense bar
+        searchExpenseView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                ArrayList<String> templist = new ArrayList<String>();
+
+                for (String temp : expenseTitles) {
+                    if (temp.toLowerCase().contains(newText.toLowerCase())) {
+                        templist.add(temp);
+                    }
+                }
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, templist);
+                expensesListView.setAdapter(adapter);
+                return true;
+            }
+        });
+
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

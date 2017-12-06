@@ -37,7 +37,6 @@ public class LatestDebtsDownloader extends AsyncTask<String, Void, ArrayList<Str
 
                             for (ParseObject object:objects) {
                                 latestDebts.add(object.getString("who") + " owes " + object.getDouble("amount") + " to " + object.getString("toWhom"));
-                                Log.i("who", object.getString("who"));
                             }
 
                         }
