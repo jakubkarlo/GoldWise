@@ -17,7 +17,7 @@ import com.parse.ParseObject;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-import jakubkarlo.com.goldwise.Downloaders.ExpensesDownloader;
+import jakubkarlo.com.goldwise.Downloaders.EventDataDownloader;
 import jakubkarlo.com.goldwise.R;
 
 /**
@@ -37,6 +37,7 @@ public class ExpensesFragment extends Fragment {
     // UI elements
     ListView expensesListView;
     SearchView searchExpenseView;
+
     ArrayList<String> expenseTitles;
 
     public ExpensesFragment() {
@@ -80,7 +81,7 @@ public class ExpensesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // says it does too much work on a main thread
-        ExpensesDownloader expensesDownloader = new ExpensesDownloader();
+        EventDataDownloader expensesDownloader = new EventDataDownloader();
         ArrayList<ParseObject> expenses = null;
 
         try {

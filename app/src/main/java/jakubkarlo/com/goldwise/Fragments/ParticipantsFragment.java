@@ -3,11 +3,24 @@ package jakubkarlo.com.goldwise.Fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.SearchView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
+import jakubkarlo.com.goldwise.Downloaders.ParticipantsDownloader;
+import jakubkarlo.com.goldwise.Models.Person;
 import jakubkarlo.com.goldwise.R;
 
 /**
@@ -19,16 +32,13 @@ import jakubkarlo.com.goldwise.R;
  * create an instance of this fragment.
  */
 public class ParticipantsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
+    private static final String EVENT_ID = "";
+    private String eventID;
     private OnFragmentInteractionListener mListener;
+
+    ListView participantsListView;
+    SearchView searchPersonView;
+
 
     public ParticipantsFragment() {
         // Required empty public constructor
@@ -41,10 +51,11 @@ public class ParticipantsFragment extends Fragment {
      * @return A new instance of fragment ParticipantsFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ParticipantsFragment newInstance() {
+    public static ParticipantsFragment newInstance(String param1) {
         ParticipantsFragment fragment = new ParticipantsFragment();
         Bundle args = new Bundle();
-
+        fragment.eventID = param1;
+        args.putString(EVENT_ID, param1);
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,17 +63,79 @@ public class ParticipantsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_participants, container, false);
+        View root = inflater.inflate(R.layout.fragment_participants, container, false);
+        searchPersonView = (SearchView) root.findViewById(R.id.searchPersonView);
+        participantsListView = (ListView) root.findViewById(R.id.participantsListView);
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ParticipantsDownloader participantsDownloader = new ParticipantsDownloader();
+        JSONArray participants = null;
+        ArrayList<Person> people = new ArrayList<>();
+        //for now display just names
+        final ArrayList<String> peopleNames = new ArrayList<>();
+
+
+        try {
+            participants = participantsDownloader.execute(eventID).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        //write all JSONs to Person Array and sum their shares
+        if (participants != null) {
+
+            for (int i = 0; i < participants.length(); i++) {
+
+                try {
+                    JSONObject currentPerson = participants.getJSONObject(i);
+                    people.add(new Person(currentPerson.getString("name"), currentPerson.getDouble("share"), currentPerson.getInt("color")));
+                    peopleNames.add(currentPerson.getString("name"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                ArrayAdapter arrayAdapter = null;
+                if (!peopleNames.isEmpty()) {
+                    arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, peopleNames);
+                    participantsListView.setAdapter(arrayAdapter);
+                }
+            }
+        }
+
+        searchPersonView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                ArrayList<String> templist = new ArrayList<String>();
+
+                for (String temp : peopleNames) {
+                    if (temp.toLowerCase().contains(newText.toLowerCase())) {
+                        templist.add(temp);
+                    }
+                }
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, templist);
+                participantsListView.setAdapter(adapter);
+                return true;
+            }
+        });
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

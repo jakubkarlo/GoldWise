@@ -31,8 +31,11 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_add_event">AddEventActivity</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--checkboxes-->
+    <string name="paid_checkbox">Paid</string>
+    <string name="notPaid_checkbox">Not Paid</string>
+    <string name="saving_checkbox">For Saving</string>
+
 
 
 </resources>
